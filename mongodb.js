@@ -1,6 +1,7 @@
 const mongodb = require('mongoDB')
-// MongClient property gives access to database to perform CRUD operations
-const MongoClient = mongodb.MongoClient
+// MonogClient property gives access to database to perform CRUD operations
+// ObjectID to create our own IDs instead of letting the MongoDB handle it
+const { MongoClient, ObjectID } = require('mongoDB')
 
 // localhost causes problems, use the localhost ip instead
 const connectionURL = 'mongodb://127.0.0.1:27017'
@@ -14,54 +15,45 @@ MongoClient.connect(connectionURL, { useNewUrlParser: true }, (error, client) =>
 
   // this will automatically create the database for us, returns database reference
   const db = client.db(databaseName)
-
-  // inserts document to 'users' collection
-  // db.collection('users').insertOne({
-  //   name: 'Derek',
-  //   age: 30
-  // }, (error, result) => {
-  //   if (error) {
-  //     return console.log('Unable to insert user')
+  // to insert document call .insertOne or .insertMany on db. References available in course PDF
+  // db.collection('users').findOne({ _id: new ObjectID('5ecc424034dcb30bac5b5615')}, (error, user) => {
+  //   if (user){
+  //     return console.log('Unable to fetch')
   //   }
 
-  //   console.log(result.ops)
+  //   console.log(user)
   // })
 
-  // db.collection('users').insertMany([
-  //   {
-  //     name: 'Jen',
-  //     age: 28
-  //   },
-  //   {
-  //     name: 'Gunther',
-  //     age: 27
-  //   }
-  // ], (error, result) => {
+  // returns a cursor with various methods to query what you need
+  // db.collection('users').find({ age: 30 }).toArray((error, users) => {
   //   if (error){
-  //     return console.log(error)
+  //     return console.log('Unable to fetch')
   //   }
 
-  //   console.log(result.ops)
+  //   console.log(users)
   // })
 
-  db.collection('tasks').insertMany([
-    {
-      description: 'Job search',
-      completed: true
-    },
-    {
-      description: 'complete task app in node course',
-      completed: false
-    },
-    {
-      description: 'create a git repo for task app',
-      completed: false
-    }
-  ], (error, result) => {
-    if (error) {
-      return console.log('Unable to insert tasks!')
+  // db.collection('users').find({ age: 30 }).count((error, count) => {
+  //   if (error){
+  //     return console.log('Unable to fetch')
+  //   }
+
+  //   console.log(count)
+  // })
+  db.collection('tasks').findOne({ _id: new ObjectID("5ecc37c724f1cf0580512e87") }, (error, user) => {
+    if (error){
+      return console.log('Unable to fetch')
     }
 
-    console.log(result.ops)
+    console.log(user)
   })
+
+  db.collection('tasks').find({ completed: false }).toArray((error, tasks) => {
+    if (error){
+      return console.log('Unable to fetch')
+    }
+
+    console.log(tasks)
+  })
+
 })
