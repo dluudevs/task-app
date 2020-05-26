@@ -16,14 +16,9 @@ MongoClient.connect(connectionURL, { useNewUrlParser: true }, (error, client) =>
   // this will automatically create the database for us, returns database reference
   const db = client.db(databaseName)
   // create, read, update, delete methods can all be found in the PDF guide
-  // db.collection('users').updateOne(
+  // db.collection('users').deleteMany(
   //   { 
-  //     _id: new ObjectID("5ecafc4f6092be0f4ca7eb6a") 
-  //   },
-  //   {
-  //     $inc: {
-  //       age: 1
-  //     }
+  //     age: 27
   //   }
   // ).then((result) => {
   //   console.log(result)
@@ -31,16 +26,8 @@ MongoClient.connect(connectionURL, { useNewUrlParser: true }, (error, client) =>
   //   console.log(error)
   // })
 
-  db.collection('tasks').updateMany(
-    {
-      completed: false
-    },
-    {
-      $set: {
-        completed: true
-      }
-    }
-  )
-  .then(result => console.log(result))
+  db.collection('tasks')
+  .deleteOne({ id: new ObjectID("5ecc37c724f1cf0580512e87")})
+  .then(result => console.log(result.deletedCount))
   .catch(error => console.log(error))
 })
