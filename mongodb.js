@@ -15,45 +15,32 @@ MongoClient.connect(connectionURL, { useNewUrlParser: true }, (error, client) =>
 
   // this will automatically create the database for us, returns database reference
   const db = client.db(databaseName)
-  // to insert document call .insertOne or .insertMany on db. References available in course PDF
-  // db.collection('users').findOne({ _id: new ObjectID('5ecc424034dcb30bac5b5615')}, (error, user) => {
-  //   if (user){
-  //     return console.log('Unable to fetch')
+  // create, read, update, delete methods can all be found in the PDF guide
+  // db.collection('users').updateOne(
+  //   { 
+  //     _id: new ObjectID("5ecafc4f6092be0f4ca7eb6a") 
+  //   },
+  //   {
+  //     $inc: {
+  //       age: 1
+  //     }
   //   }
-
-  //   console.log(user)
+  // ).then((result) => {
+  //   console.log(result)
+  // }).catch((error) => {
+  //   console.log(error)
   // })
 
-  // returns a cursor with various methods to query what you need
-  // db.collection('users').find({ age: 30 }).toArray((error, users) => {
-  //   if (error){
-  //     return console.log('Unable to fetch')
-  //   }
-
-  //   console.log(users)
-  // })
-
-  // db.collection('users').find({ age: 30 }).count((error, count) => {
-  //   if (error){
-  //     return console.log('Unable to fetch')
-  //   }
-
-  //   console.log(count)
-  // })
-  db.collection('tasks').findOne({ _id: new ObjectID("5ecc37c724f1cf0580512e87") }, (error, user) => {
-    if (error){
-      return console.log('Unable to fetch')
+  db.collection('tasks').updateMany(
+    {
+      completed: false
+    },
+    {
+      $set: {
+        completed: true
+      }
     }
-
-    console.log(user)
-  })
-
-  db.collection('tasks').find({ completed: false }).toArray((error, tasks) => {
-    if (error){
-      return console.log('Unable to fetch')
-    }
-
-    console.log(tasks)
-  })
-
+  )
+  .then(result => console.log(result))
+  .catch(error => console.log(error))
 })
