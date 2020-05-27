@@ -40,31 +40,44 @@ const User = mongoose.model('User', {
         throw new Error('Age must be a positive number')
       }
     }
+  },
+  password: {
+    type: String,
+    required: true,
+    trim: true,
+    minlength: 7,
+    validate(value) {
+      if(value.toLowerCase().includes('password')){
+        throw new Error('Your password cannot contain "password')
+      }
+    }
   }
 })
 
-const me = new User({
-  name: '      Derek    ',
-  email: 'myemail@gmail.com        '
-})
+// const me = new User({
+//   name: '      Derek    ',
+//   email: 'myemail@gmail.com        ',
+//   password: '       phone123!           '
+// })
 
-me.save()
-  .then(me => console.log(me))
-  .catch(error => console.log('error', error))
+// me.save()
+//   .then(me => console.log(me))
+//   .catch(error => console.log('error', error))
 
 // string gets lower-cased and pluralized before being added as a collection in MongoDB
 const Task = mongoose.model('Task', {
   description: {
-    type: String
+    type: String,
+    required: true,
   },
   completed: {
-    type: Boolean
+    type: Boolean,
+    default: false
   }
 })
 
 // const readBook = new Task({
 //   description: 'Read Man\'s search for meaning',
-//   completed: false
 // })
 
 // readBook.save()
