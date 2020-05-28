@@ -1,7 +1,8 @@
 const mongoose = require('mongoose')
 const validator = require('validator')
 
-// / constructor function for model
+// models define the structure of the collection
+// constructor function for model
 const User = mongoose.model('User', {
   // types use constructor function from js as values
   name: {
