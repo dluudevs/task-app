@@ -7,5 +7,7 @@ mongoose.connect('mongodb://127.0.0.1:27017/task-manager-api', {
   useNewUrlParser: true,
   // ensures when mongoose works with mongodb, a new index is created
   useCreateIndex: true,
+  // removes deprecation warning for useFindAndModify
+  useFindAndModify: false
 })
 
