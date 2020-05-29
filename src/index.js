@@ -89,6 +89,56 @@ app.post('/tasks', async (req, res) => {
   }
 })
 
+// update 
+app.patch('/users/:id', async (req, res) => {
+  const updates = Object.keys(req.body)
+  const allowedUpdates = ['name', 'email', 'password', 'age']
+  // tests whether all elements in array passes test implemented in callback function, returns a callback value
+  // one false will return value of false, requires all true to return value of true
+  const isValidOperation = updates.every((update) => allowedUpdates.includes(update))
+
+  if (!isValidOperation) {
+    return res.status(400).send({ error: 'Invalid Updates' })
+  }
+
+  try {
+    // option will return updated user and run validators from user model
+    const user = await User.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true })
+
+    if (!user){
+      return res.status(404).send()
+    }
+    
+    res.send(user)
+  } catch (e) {
+    // when user fails validation
+    res.status(400).send(e)
+  }
+})
+
+app.patch('/tasks/:id', async (req, res) => {
+  const updates = Object.keys(req.body)
+  const allowedUpdates = ['description', 'completed']
+  const isUpdateAllowed = updates.every(update => allowedUpdates.includes(update))
+
+  if (!isUpdateAllowed){
+    return res.status(400).send({ error: "Invalid Updates"})
+  }
+
+  try {
+    const task = await Task.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true})
+
+    if (!task){
+      return res.status(404).send()
+    }
+
+    res.send(task)
+  } catch (e) {
+    // when user fails validation
+    res.status(400).send(e)
+  }
+})
+
 app.listen(port, () => {
   console.log('Server is up on', port)
 })
