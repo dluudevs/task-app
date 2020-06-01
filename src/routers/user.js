@@ -65,7 +65,12 @@ router.patch('/users/:id', async (req, res) => {
 
   try {
     // option will return updated user and run validators from user model
-    const user = await User.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true })
+    // requires runvalidators in options because findByIdAndUpdate method, bypasses mongoose's model and performs direct operation on databaSe
+    const user = await User.findById(req.params.id)
+    updates.forEach((update) => user[update] = req.body[update])
+    await user.save()
+
+    // const user = await User.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true })
 
     if (!user){
       return res.status(404).send()

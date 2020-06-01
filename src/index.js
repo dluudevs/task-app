@@ -27,12 +27,8 @@ const myFunction = async () => {
   // second argument = number of rounds, the number of the times the hashing algorithm is executed
   const hashedPassword = await bcrypt.hash(password, 8)
 
-  console.log(password)
-  console.log(hashedPassword)
-
   // compare hashes plain text password and compares with hashedpassword to authenticate users
   const isMatch = await bcrypt.compare('red12345!', hashedPassword)
-  console.log(isMatch)
 }
 
 myFunction()
