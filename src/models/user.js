@@ -19,6 +19,8 @@ const userSchema = new mongoose.Schema({
     required: true,
     trim: true,
     lowercase: true,
+    // when adding unique to an existing collection, the collection must be wiped for this property to take effect
+    unique: true,
     // custom validation using validator library. data sanization options will always run before validate function
     validate(value) {
       if(!validator.isEmail(value)){
@@ -63,6 +65,28 @@ userSchema.pre('save', async function(next){
   // when function is complete (including async tasks) call next, otherwise applicaton would hang
   next()
 })
+
+// to create custom methods, much like above; a schema must be passed to mongoose.model
+// add method to statics property
+userSchema.statics.findByCredentials = async (email, password) => {
+  // User represents User collection
+  const user = await User.findOne({ email })
+
+  if (!user){
+    throw new Error('Unable to login')
+  }
+
+  // convert plain text pw to hash and compare with hashed password (pw stored in collection)
+  const isMatch = await bcrypt.compare(password, user.password)
+
+  if (!isMatch){
+    throw new Error('Unable to login')
+  }
+
+  // this will return a promise because this is an async function
+  return user
+
+}
 
 // models define the structure of the collection
 // constructor function for model

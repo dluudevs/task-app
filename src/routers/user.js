@@ -51,6 +51,16 @@ router.post('/users', async (req, res) => {
   }
 })
 
+router.post('/users/login', async (req, res) => {
+  try {
+    // this is a custom method that was created with middleware inside of the user model
+    const user = await User.findByCredentials(req.body.email, req.body.password)
+    res.send(user)
+  } catch (e) { 
+    res.status(400).send()
+  }
+})
+
 // update 
 router.patch('/users/:id', async (req, res) => {
   const updates = Object.keys(req.body)
