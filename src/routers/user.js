@@ -1,23 +1,18 @@
 const express = require('express')
 const router = new express.Router()
 const User = require('../models/user')
+const auth = require('../middleware/auth')
 
 router.get('/test', (req, res) => {
   res.send('From a new file')
 })
 
 // async doesn't change anything, as express doesn't require a return value (async will always return a resolved promise with returned value)
-router.get('/users', async (req, res) => {
-  // will try and catch individual promises (since async tasks run one at a time)
-  try {
-    // Searches the model (collection) for all documents
-    const users = await User.find({})
-    // only runs when promise above is fulfilled
-    res.send(users)
-  } catch (e) {
-    // if get request fails, it is usually due to a network issue
-    res.status(500).send
-  }
+// second argument is middleware, third argument is route handler
+router.get('/users/me', auth, async (req, res) => {
+  // the router handler will only run when user is authenticated (middleware)
+  // the middleware function stored the user payload in req.user
+  res.send(req.user)
 })
 
 // : grants access to the dyanmic value (router parametrs) in the route, this is something the user chooses
@@ -44,7 +39,7 @@ router.post('/users', async (req, res) => {
   try {
     // https://mongoosejs.com/docs/api/model.html
     await user.save()
-    // generate token once a new user is added to collection so user doesn't have to login
+    // generate token once a new user is added to collection so user doesn't have to login. (only runs when above promise is fulfilled)
     const token = await user.generateAuthToken()
     // errors by default sends 200 status code, this is misleading
     res.status(201).send({ user, token })

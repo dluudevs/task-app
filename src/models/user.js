@@ -63,7 +63,7 @@ const userSchema = new mongoose.Schema({
 })
 
 // mongoose middlewhere lets us hash in one spot instead of having to change the functionality at each route
-// must be function declaration as this keyword needs to be binded to the function
+// must be function declaration as this keyword needs to be binded to the function - function runs when save event occurs
 userSchema.pre('save', async function(next){
   // this represents the document (user) that is about to be saved
   const user = this 
@@ -94,7 +94,7 @@ userSchema.methods.generateAuthToken = async function() {
 }
 
 // to create custom methods, much like above; a schema must be passed to mongoose.model
-// add method to statics property (aka model methods) - static methods are accessible on the model 
+// add method to statics property (aka model methods) - static methods are only accessible on the model 
 userSchema.statics.findByCredentials = async (email, password) => {
   // User represents User collection
   const user = await User.findOne({ email })
