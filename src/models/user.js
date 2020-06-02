@@ -1,6 +1,7 @@
 const mongoose = require('mongoose')
 const validator = require('validator')
 const bcrypt = require('bcryptjs')
+const jwt = require('jsonwebtoken')
 
 // middleware to customize behaviour of mongoose model. middleware will run before or after certain events occur
 // https://mongoosejs.com/docs/middleware.html
@@ -48,7 +49,17 @@ const userSchema = new mongoose.Schema({
         throw new Error('Your password cannot contain "password')
       }
     }
-  }
+  },
+  // tokens property is an array of objects with a token property
+  // items inside the array are sub-documents and will have their own objectid generated
+  tokens: [
+    {
+      token: {
+        type: String,
+        required: true
+      }
+    }
+  ]
 })
 
 // mongoose middlewhere lets us hash in one spot instead of having to change the functionality at each route
@@ -59,15 +70,31 @@ userSchema.pre('save', async function(next){
   
   // only hash if password has been modified
   if (user.isModified('password')) {
-    // change user password to its hash format
+    // change user password to its hash format. passwords are plain text, convert to hash to protect user's privacy
+    // hashed passwords cannot be reverted to its plain text format
     user.password = await bcrypt.hash(user.password, 8)  
   }
   // when function is complete (including async tasks) call next, otherwise applicaton would hang
   next()
 })
 
+// function declaration as this keyword needs to be binded to function
+// add method to methods property (aka instance methods) - methods added to methods property are only accessible on instances (eg., a document)
+userSchema.methods.generateAuthToken = async function() {
+  const user = this
+  // id is an Object, must be converted to string for jwt
+  // sign method requires data and secret that signs the token
+  const token = jwt.sign({_id: user._id.toString()}, "thisismynewcourse")
+  // jwt token is to create data (with object) that is verifiable with the signature (second argument)
+  // jwt token seperated by two periods. first part = header, second = object, third = signature
+  user.tokens = [...user.tokens, { token } ]
+  await user.save()
+
+  return token
+}
+
 // to create custom methods, much like above; a schema must be passed to mongoose.model
-// add method to statics property
+// add method to statics property (aka model methods) - static methods are accessible on the model 
 userSchema.statics.findByCredentials = async (email, password) => {
   // User represents User collection
   const user = await User.findOne({ email })

@@ -19,16 +19,17 @@ app.listen(port, () => {
   console.log('Server is up on', port)
 })
 
-const bcrypt = require('bcryptjs')
+const jwt = require('jsonwebtoken')
 
 const myFunction = async () => {
-  const password = "red12345!"
-  // hashing converts plain text passswords into unreadable strings, cannot be reverse to plain text password
-  // second argument = number of rounds, the number of the times the hashing algorithm is executed
-  const hashedPassword = await bcrypt.hash(password, 8)
+  // method returns authentication token
+  // object requires unique identifier for user being authenticated
+  // second argument signs the token, making sure the token hasn't been altered in anyway - just requires random series of characters
+ const token = jwt.sign({ _id: 'abc123' }, 'thisismynewcourse', { expiresIn: '7 days'})
+  
 
-  // compare hashes plain text password and compares with hashedpassword to authenticate users
-  const isMatch = await bcrypt.compare('red12345!', hashedPassword)
+  // returns payload if token is valid (user authenticated properly), otherwise an error is thrown
+ const data = jwt.verify(token, 'thisismynewcourse')
 }
 
 myFunction()

@@ -40,11 +40,14 @@ router.get('/users/:id', async (req, res) => {
 router.post('/users', async (req, res) => {
   // in client request body contains all the data to be sent to the server, here we have user details (ie., name)
   const user = new User(req.body)
+  
   try {
     // https://mongoosejs.com/docs/api/model.html
     await user.save()
+    // generate token once a new user is added to collection so user doesn't have to login
+    const token = await user.generateAuthToken()
     // errors by default sends 200 status code, this is misleading
-    res.status(201).send(user)
+    res.status(201).send({ user, token })
   } catch (e) {
     // 4xx is for when the user does something wrong 5xx for network error
     res.status(400).send(e)
@@ -53,9 +56,11 @@ router.post('/users', async (req, res) => {
 
 router.post('/users/login', async (req, res) => {
   try {
-    // this is a custom method that was created with middleware inside of the user model
+    // this is a custom method that was created with middleware inside of the user model. this is fine because the methos is searching witin the collection
     const user = await User.findByCredentials(req.body.email, req.body.password)
-    res.send(user)
+    // create method on user instance, because this method generates a user specific token. the collection doesn't require this functionality
+    const token = await user.generateAuthToken()
+    res.send({ user, token })
   } catch (e) { 
     res.status(400).send()
   }
