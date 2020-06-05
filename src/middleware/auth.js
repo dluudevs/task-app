@@ -10,11 +10,13 @@ const auth = async (req, res, next) => {
     const decoded = jwt.verify(token, 'thisismynewcourse')
     // find by user id and token, as token will have to be deleted when user logs out
     const user = await User.findOne({ _id: decoded._id, 'tokens.token': token  })
+    
     if (!user){
       // throw error to trigger catch if no user found
       throw new Error() 
     }
-    // stores the located user so route handler does not need to find user again
+    // stores the located user and token so route handler can access these values
+    req.token = token
     req.user = user
     // otherwise call route handler function
     next()
