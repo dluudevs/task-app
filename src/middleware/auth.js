@@ -1,6 +1,9 @@
 const jwt = require('jsonwebtoken')
 const User = require('../models/user')
 
+// this function serves as a middleware function, hence why next() is called at the end of it
+// this function must be passed a second argument to the routers defined user routers
+// authentication forces users to login before they can perform certain tasks like deleting their own profile or reading their own profile
 const auth = async (req, res, next) => {
   try {
     // if no header with authorization found, replace wont work. the error will be caught by the catch method

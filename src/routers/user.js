@@ -15,23 +15,6 @@ router.get('/users/me', auth, async (req, res) => {
   res.send(req.user)
 })
 
-// : grants access to the dyanmic value (router parametrs) in the route, this is something the user chooses
-router.get('/users/:id', async (req, res) => {
-  // contains route parameters as an object
-  const _id = req.params.id
-  try {
-    const user = await User.findById(_id)
-    // With mongoose, if no user is found it will not throw an error
-    if (!user){
-      // return a 404 code if no user is found
-      return res.status(404).send()
-    }
-    res.send(user)
-  } catch (e) {
-    res.status(500).send()
-  }
-})
-
 router.post('/users', async (req, res) => {
   // in client request body contains all the data to be sent to the server, here we have user details (ie., name)
   const user = new User(req.body)
@@ -83,7 +66,7 @@ router.post('/users/logoutAll', auth, async (req, res) => {
 })
 
 // update 
-router.patch('/users/:id', async (req, res) => {
+router.patch('/users/me', auth, async (req, res) => {
   const updates = Object.keys(req.body)
   const allowedUpdates = ['name', 'email', 'password', 'age']
   // tests whether all elements in array passes test implemented in callback function, returns a callback value
@@ -95,17 +78,9 @@ router.patch('/users/:id', async (req, res) => {
   }
 
   try {
-    // option will return updated user and run validators from user model
-    // requires runvalidators in options because findByIdAndUpdate method, bypasses mongoose's model and performs direct operation on databaSe
-    const user = await User.findById(req.params.id)
+    const user = req.user
     updates.forEach((update) => user[update] = req.body[update])
     await user.save()
-
-    // const user = await User.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true })
-
-    if (!user){
-      return res.status(404).send()
-    }
 
     res.send(user)
   } catch (e) {
@@ -114,15 +89,19 @@ router.patch('/users/:id', async (req, res) => {
   }
 })
 
-router.delete('/users/:id', async(req, res) => {
+router.delete('/users/me', auth, async(req, res) => {
   try {
-    const user = await User.findByIdAndDelete(req.params.id)
+    // const user = await User.findByIdAndDelete(req.user._id)
     
-    if (!user){
-      return res.status(404).send()
-    }
-
-    res.send(user)
+    // if (!user){
+      //   return res.status(404).send()
+      // }
+      
+    // auth middleware function passes the user object
+    // since the user is retrieved with the auth middleware function we have the credentials necessary to remove the user directly (the above code is no longer necessary)
+    // this holds true for any routes that use auth as middleware function
+    await req.user.remove()
+    res.send(req.user)
   } catch (e) {
     res.status(500).send()
   }
