@@ -62,8 +62,11 @@ const userSchema = new mongoose.Schema({
   ]
 })
 
+// without middleware: new request -> new request -> run router handler
+// with middleware: new request -> do something -> run route handler
+
 // mongoose middlewhere lets us hash in one spot instead of having to change the functionality at each route
-// must be function declaration as this keyword needs to be binded to the function - function runs when save event occurs
+// function runs when save event occurs                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 - must be function declaration as this keyword needs to be binded to the function 
 userSchema.pre('save', async function(next){
   // this represents the document (user) that is about to be saved
   const user = this 
@@ -80,6 +83,7 @@ userSchema.pre('save', async function(next){
 
 // function declaration as this keyword needs to be binded to function
 // add method to methods property (aka instance methods) - methods added to methods property are only accessible on instances (eg., a document)
+// method store in user instance - stores a signed JWT token to the database and pass the token to the router handler function
 userSchema.methods.generateAuthToken = async function() {
   const user = this
   // id is an Object, must be converted to string for jwt
@@ -90,7 +94,23 @@ userSchema.methods.generateAuthToken = async function() {
   user.tokens = [...user.tokens, { token } ]
   await user.save()
 
+  // return token because routers will need access to the token (users/login)
   return token
+}
+
+// method must be named toJSON
+// when expresss sends request, JSON.stringify(obj) runs behind the scenes (converts JS object to JSON string) 
+// .toJSON method gets called whenever the object gets passed to JSON.stringify(). this method gets called before stringify and passes the returned value to JSON.stringify
+// because of this, we can manipulate the object before it is sent to the user
+userSchema.methods.toJSON = function () {
+  const user = this
+  const userObject = user.toObject()
+
+  // delete is an operator that removes a property from an object
+  delete userObject.password
+  delete userObject.tokens
+
+  return userObject
 }
 
 // to create custom methods, much like above; a schema must be passed to mongoose.model

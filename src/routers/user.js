@@ -53,7 +53,7 @@ router.post('/users/login', async (req, res) => {
   try {
     // this is a custom method that was created with middleware inside of the user model. this is fine because the methos is searching witin the collection
     const user = await User.findByCredentials(req.body.email, req.body.password)
-    // create method on user instance, because this method generates a user specific token. the collection doesn't require this functionality
+    // create method on user instance instead of the model, because this method generates a user specific token
     const token = await user.generateAuthToken()
     res.send({ user, token })
   } catch (e) { 
