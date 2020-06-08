@@ -8,60 +8,69 @@ const Task = require('./tasks')
 // https://mongoosejs.com/docs/middleware.html
 // create schema first and pass mongoose.model to take advantage of middleware
 
-const userSchema = new mongoose.Schema({
+// A MongoDB schema defines the structure of any documents that are stored in a particular collection. You can think of it as blueprints to build a house.
+// A MongoDB document would be a single house built from the house blueprint (schema) above.
+// A MongoDB model provides the interface to perform Create, Read, Update and Delete (CRUD) operations on the collection as a whole or an individual document.
+
+const userSchema = new mongoose.Schema(
+  {
   // types use constructor function from js as values
-  name: {
-    type: String,
-    required: true,
-    // data sanitization options (found under schematypes, scroll down to type)
-    trim: true,
-  },
-  email: {
-    type: String,
-    required: true,
-    trim: true,
-    lowercase: true,
-    // when adding unique to an existing collection, the collection must be wiped for this property to take effect
-    unique: true,
-    // custom validation using validator library. data sanization options will always run before validate function
-    validate(value) {
-      if(!validator.isEmail(value)){
-        throw new Error('Email is invalid')
+    name: {
+      type: String,
+      required: true,
+      // data sanitization options (found under schematypes, scroll down to type)
+      trim: true,
+    },
+    email: {
+      type: String,
+      required: true,
+      trim: true,
+      lowercase: true,
+      // when adding unique to an existing collection, the collection must be wiped for this property to take effect
+      unique: true,
+      // custom validation using validator library. data sanization options will always run before validate function
+      validate(value) {
+        if(!validator.isEmail(value)){
+          throw new Error('Email is invalid')
+        }
       }
-    }
-  },
-  age: {
-    type: Number,
-    default: 0,
-    // custom validation
-    validate(value) {
-      if (value < 0){
-        throw new Error('Age must be a positive number')
+    },
+    age: {
+      type: Number,
+      default: 0,
+      // custom validation
+      validate(value) {
+        if (value < 0){
+          throw new Error('Age must be a positive number')
+        }
       }
-    }
-  },
-  password: {
-    type: String,
-    required: true,
-    trim: true,
-    minlength: 7,
-    validate(value) {
-      if(value.toLowerCase().includes('password')){
-        throw new Error('Your password cannot contain "password')
+    },
+    password: {
+      type: String,
+      required: true,
+      trim: true,
+      minlength: 7,
+      validate(value) {
+        if(value.toLowerCase().includes('password')){
+          throw new Error('Your password cannot contain "password')
+        }
       }
-    }
-  },
-  // tokens property is an array of objects with a token property
-  // items inside the array are sub-documents and will have their own objectid generated
-  tokens: [
-    {
-      token: {
-        type: String,
-        required: true
+    },
+    // tokens property is an array of objects with a token property
+    // items inside the array are sub-documents and will have their own objectid generated
+    tokens: [
+      {
+        token: {
+          type: String,
+          required: true
+        }
       }
-    }
-  ]
-})
+    ]
+  },
+  {
+    timestamps: true
+  }
+)
 
 // virtual property - not data stored in database, but a relationship between two entities. between user and tasks
 // virtual because not changing what is stored in the user document, just a way for mongoose to determine how these two things are related

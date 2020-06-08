@@ -3,14 +3,34 @@ const router = new express.Router()
 const Task = require('../models/tasks')
 const auth = require('../middleware/auth')
 
+// GET /tasks?completed=false
+// GET /tasks?limit=10&skip=0
 router.get('/tasks', auth, async (req, res) => {
   try {
-    // no error handling required, since endpoint is searching for ALL documents. if it returns an empty array, nothing was found
-    // const task = await Task.find({ owner: req.user._id })
+    // no if statement required, since endpoint is searching for ALL documents. if it returns an empty array, nothing was found
 
+    const match = {}
+    
+    // if query exists, assign completed property otherwise provide an empty object
+    if (req.query.completed) {
+      // if completed is false or anything else, the expression will evaluate to false
+      // setup this way because the value in the query is a string and match requires a boolean
+      match.completed = req.query.completed === 'true'
+    }
     // populate all data from a relationship (virtual property in user model), in this case we want to populate our reference to tasks
     // will populate all tasks with owner field (contains _id) that matches user _id field
-    await req.user.populate('tasks').execPopulate()
+    // await req.user.populate('tasks').execPopulate()
+
+    await req.user.populate({
+      path: 'tasks',
+      match,
+      options: {
+        // if limit / skip query isnt provided, the property is ignored by mongoose
+        limit: parseInt(req.query.limit),
+        // skip is the number of items to skip (eg., limit 2 and skip 2 would show page 2, because each page is limited to 2 items and 2 items are skipped)
+        skip: parseInt(req.query.skip)
+      }
+    }).execPopulate()
     res.send(req.user.tasks)
   } catch (e) {
     res.status(500).send()
