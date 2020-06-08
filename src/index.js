@@ -19,12 +19,16 @@ app.listen(port, () => {
   console.log('Server is up on', port)
 })
 
-const pet = { 
-  name: 'Hal'
+const main = async () => {
+  // const task = await Task.findById('5edc3d92bccdee8704ee47cd')
+  // // populate all data from a relationship, in this case we want to populate our reference to owner
+  // // will use the ID to find associated user profile and assign it to task.owner
+  // await task.populate('owner').execPopulate()
+  // console.log(task.owner)
+
+  const user = await User.findById('5edc3a464942da8b84ca444e')
+  await user.populate('tasks').execPopulate()
+  // console.log(user.tasks)
 }
 
-pet.toJSON = function () {
-  console.log(this)
-  return {}
-}
-console.log(JSON.stringify(pet))
+main()

@@ -62,6 +62,20 @@ const userSchema = new mongoose.Schema({
   ]
 })
 
+// virtual property - not data stored in database, but a relationship between two entities. between user and tasks
+// virtual because not changing what is stored in the user document, just a way for mongoose to determine how these two things are related
+// first argument is name for virtual field, second argument configures the field
+// this essentially allows us to populate without actually storing tasks in the user model 
+userSchema.virtual('tasks', {
+  ref: 'Task',
+  // field that ref (task) is associated with locally (user). task uses relationship with user to find the user profile using the _id
+  localField: '_id',
+  // name of the field on the (ref) task that is creating this relationship
+  foreignField: 'owner'
+  // in the tasks model; owner is the local field and _id is the foreignField
+  // use localField value to find tasks with the same value in the foreignField
+})
+
 // without middleware: new request -> new request -> run router handler
 // with middleware: new request -> do something -> run route handler
 
