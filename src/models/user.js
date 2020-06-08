@@ -2,6 +2,7 @@ const mongoose = require('mongoose')
 const validator = require('validator')
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
+const Task = require('./tasks')
 
 // middleware to customize behaviour of mongoose model. middleware will run before or after certain events occur
 // https://mongoosejs.com/docs/middleware.html
@@ -92,6 +93,12 @@ userSchema.pre('save', async function(next){
     user.password = await bcrypt.hash(user.password, 8)  
   }
   // when function is complete (including async tasks) call next, otherwise applicaton would hang
+  next()
+})
+
+userSchema.pre('remove', async function (next) {
+  const user = this
+  await Task.deleteMany({ owner: user._id })
   next()
 })
 
