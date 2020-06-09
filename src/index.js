@@ -23,7 +23,22 @@ app.listen(port, () => {
 const multer = require('multer')
 const upload = multer({ 
   // where uploads are saved
-  dest: 'images'
+  dest: 'images',
+  limits: {
+    // uses bytes as unit of measure 
+    fileSize: 1000000
+  },
+  // cb is the callback to tell multer fileFilter is done running
+  fileFilter(req, file, cb){
+    // endsWith is JavaScript string method
+    // regex: / escapes the '.' paranthesis for group match '|' is for alternate (doc OR docx) '$' means at the end of the string
+    if (!file.originalname.match(/\.(doc|docx)$/)) {
+      return cb(new Error('Please upload a word document'))
+    }
+
+    // first argument is error, second argument is true if file is accepted
+    cb(undefined, true)
+  }
 })
 
 // the returned value of upload.single is what is being passed as middleware. (the argument passed is the name of the upload)
@@ -31,11 +46,3 @@ const upload = multer({
 app.post('/upload', upload.single('upload'), (req, res) => {
   res.send()
 })
-
-// const avatar = multer({
-//   dest: 'avatar'
-// })
-
-// app.post('/users/me/avatar', avatar.single('avatar'), (req, res) => {
-//   res.send()
-// })
