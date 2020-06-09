@@ -19,16 +19,23 @@ app.listen(port, () => {
   console.log('Server is up on', port)
 })
 
-const main = async () => {
-  // const task = await Task.findById('5edc3d92bccdee8704ee47cd')
-  // // populate all data from a relationship, in this case we want to populate our reference to owner
-  // // will use the ID to find associated user profile and assign it to task.owner
-  // await task.populate('owner').execPopulate()
-  // console.log(task.owner)
+// multer is middleware and must be passed as such to route
+const multer = require('multer')
+const upload = multer({ 
+  // where uploads are saved
+  dest: 'images'
+})
 
-  // const user = await User.findById('5edc3a464942da8b84ca444e')
-  // await user.populate('tasks').execPopulate()
-  // console.log(user.tasks)
-}
+// the returned value of upload.single is what is being passed as middleware. (the argument passed is the name of the upload)
+// middleware tells multer to look for file named upload when the request comes in. this will be the key in the request's body
+app.post('/upload', upload.single('upload'), (req, res) => {
+  res.send()
+})
 
-main()
+// const avatar = multer({
+//   dest: 'avatar'
+// })
+
+// app.post('/users/me/avatar', avatar.single('avatar'), (req, res) => {
+//   res.send()
+// })
