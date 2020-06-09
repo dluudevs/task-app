@@ -41,8 +41,14 @@ const upload = multer({
   }
 })
 
-// the returned value of upload.single is what is being passed as middleware. (the argument passed is the name of the upload)
-// middleware tells multer to look for file named upload when the request comes in. this will be the key in the request's body
+const errorMiddleware = (req, res, next) => {
+  throw new Error('From my middleware')
+}
+
+// third argument is a callback that only runs when an error is thrown in the route
 app.post('/upload', upload.single('upload'), (req, res) => {
   res.send()
+// all 4 arguments necessary so express knows this function is meant to handle errors
+}, (error, req, res, next) => {
+  res.status(400).send({ error: error.message })
 })

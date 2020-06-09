@@ -121,8 +121,13 @@ const upload = multer({
     cb(undefined, true)
   }
 })
+
+// the returned value of upload.single is what is being passed as middleware. (the argument passed is the name of the upload)
+// middleware tells multer to look for file named upload when the request comes in. this will be the key in the request's body
 router.post('/users/me/avatar', upload.single('avatar'), (req, res) => {
   res.send()
+}, (error, req, res, next) => {
+  res.status(400).send({ error: error.message })
 })
 
 // export router all the routes are just methods of the router object
