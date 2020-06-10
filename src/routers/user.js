@@ -109,7 +109,9 @@ router.delete('/users/me', auth, async(req, res) => {
 })
 
 const upload = multer({ 
-  dest: 'avatars',
+  // by removing dest option, the files will not save in project folder. this isnt sustainable because it requires a push every time user uploads an image which isnt possible 
+  // the file will now be passed to the route handler
+  // dest: 'avatars',
   limits: {
     fileSize: 1000000
   },
@@ -124,10 +126,21 @@ const upload = multer({
 
 // the returned value of upload.single is what is being passed as middleware. (the argument passed is the name of the upload)
 // middleware tells multer to look for file named upload when the request comes in. this will be the key in the request's body
-router.post('/users/me/avatar', upload.single('avatar'), (req, res) => {
+router.post('/users/me/avatar', auth, upload.single('avatar'), async (req, res) => {
   res.send()
+  // uploaded file. buffer is where the data is temporarily stored waiting to be processed
+  req.user.avatar = req.file.buffer
+  await req.user.save()
+// all 4 arguments necessary so express knows this function is meant to handle errors
 }, (error, req, res, next) => {
   res.status(400).send({ error: error.message })
+})
+
+router.delete('/users/me/avatar', auth, async (req, res) => {
+  // setting property to undefined will remove it from the user object
+  req.user.avatar = undefined
+  await req.user.save()
+  res.send()
 })
 
 // export router all the routes are just methods of the router object
