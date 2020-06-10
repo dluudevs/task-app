@@ -143,5 +143,25 @@ router.delete('/users/me/avatar', auth, async (req, res) => {
   res.send()
 })
 
+router.get('/users/:id/avatar', async (req, res) => {
+  // try block incase user cannot be found
+  // not using auth because if a user wants to look at another user's avatar they should be able to do so
+  try {
+    const user = await User.findById(req.params.id)
+
+    if (!user || !user.avatar) {
+      // will be caught by catch block
+      throw new Error()
+    }
+
+    // sets headers - express automatically sets this property. eg., when sending json back, express sets the value too application/json
+    // using set we can set the response to an image
+    res.set('Content-Type', 'image/jpg')
+    res.send(user.avatar)
+  } catch (e) {
+    res.status(400).send()
+  }
+})
+
 // export router all the routes are just methods of the router object
 module.exports = router
