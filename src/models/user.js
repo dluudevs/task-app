@@ -140,8 +140,10 @@ userSchema.methods.toJSON = function () {
   const userObject = user.toObject()
 
   // delete is an operator that removes a property from an object
+  // dont show user password and tokens, delete avatar to speed up send requests
   delete userObject.password
   delete userObject.tokens
+  delete userObject.avatar
 
   return userObject
 }

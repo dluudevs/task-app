@@ -3,6 +3,7 @@ const router = new express.Router()
 const User = require('../models/user')
 const auth = require('../middleware/auth')
 const multer = require('multer')
+const sharp = require('sharp')
 
 router.get('/test', (req, res) => {
   res.send('From a new file')
@@ -115,11 +116,13 @@ const upload = multer({
   limits: {
     fileSize: 1000000
   },
+  // cb is the callback to tell multer fileFilter is done running
   fileFilter(req, file, cb){
     if (!file.originalname.match(/\.(jpg|jpeg|png)$/)) {
       return cb(new Error('File must be a picture'))
     }
 
+    // first argument is error, second argument is true if file is accepted
     cb(undefined, true)
   }
 })
@@ -128,8 +131,10 @@ const upload = multer({
 // middleware tells multer to look for file named upload when the request comes in. this will be the key in the request's body
 router.post('/users/me/avatar', auth, upload.single('avatar'), async (req, res) => {
   res.send()
-  // uploaded file. buffer is where the data is temporarily stored waiting to be processed
-  req.user.avatar = req.file.buffer
+  // uploaded file. buffer is where the data is temporarily stored waiting to be processed (like RAM)
+  // convert the file and save it to buffer so that it can be accessed later
+  const buffer = await sharp(req.file.buffer).resize({ width: 250, height: 250}).png().toBuffer()
+  req.user.avatar = buffer
   await req.user.save()
 // all 4 arguments necessary so express knows this function is meant to handle errors
 }, (error, req, res, next) => {
@@ -153,10 +158,9 @@ router.get('/users/:id/avatar', async (req, res) => {
       // will be caught by catch block
       throw new Error()
     }
-
     // sets headers - express automatically sets this property. eg., when sending json back, express sets the value too application/json
     // using set we can set the response to an image
-    res.set('Content-Type', 'image/jpg')
+    res.set('Content-Type', 'image/png')
     res.send(user.avatar)
   } catch (e) {
     res.status(400).send()
