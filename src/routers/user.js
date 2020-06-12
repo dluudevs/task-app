@@ -4,6 +4,7 @@ const User = require('../models/user')
 const auth = require('../middleware/auth')
 const multer = require('multer')
 const sharp = require('sharp')
+const { sendWelcomeEmail, sendCancelEmail } = require('../emails/account')
 
 router.get('/test', (req, res) => {
   res.send('From a new file')
@@ -24,6 +25,7 @@ router.post('/users', async (req, res) => {
   try {
     // https://mongoosejs.com/docs/api/model.html
     await user.save()
+    sendWelcomeEmail(user.email, user.name)
     // generate token once a new user is added to collection so user doesn't have to login. (only runs when above promise is fulfilled)
     const token = await user.generateAuthToken()
     // errors by default sends 200 status code, this is misleading
@@ -103,6 +105,7 @@ router.delete('/users/me', auth, async(req, res) => {
     // since the user is retrieved with the auth middleware function we have the credentials necessary to remove the user directly (the above code is no longer necessary)
     // this holds true for any routes that use auth as middleware function
     await req.user.remove()
+    sendCancelEmail(req.user.email, req.user.name)
     res.send(req.user)
   } catch (e) {
     res.status(500).send()
