@@ -121,7 +121,7 @@ userSchema.methods.generateAuthToken = async function() {
   const user = this
   // id is an Object, must be converted to string for jwt
   // sign method requires data and secret that signs the token
-  const token = jwt.sign({_id: user._id.toString()}, "thisismynewcourse")
+  const token = jwt.sign({_id: user._id.toString()}, process.env.JWT_SECRET)
   // jwt token is to create data (with object) that is verifiable with the signature (second argument)
   // jwt token seperated by two periods. first part = header, second = object, third = signature
   user.tokens = [...user.tokens, { token } ]

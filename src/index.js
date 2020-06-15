@@ -7,7 +7,7 @@ const userRouter = require('./routers/user')
 const taskRouter = require('./routers/task')
 
 const app = express()
-const port = process.env.PORT || 3000
+const port = process.env.PORT
 
 // use customizes server to parse incoming json to a JavaScript object. Becomes accessible in request parameter in the various methods' callback
 app.use(express.json())
