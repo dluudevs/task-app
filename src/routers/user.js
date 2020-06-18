@@ -36,6 +36,7 @@ router.post('/users', async (req, res) => {
   }
 })
 
+// post method because authentication requires an auth token to be generated
 router.post('/users/login', async (req, res) => {
   try {
     // this is a custom method that was created with middleware inside of the user model. this is fine because the methos is searching witin the collection
@@ -112,6 +113,7 @@ router.delete('/users/me', auth, async(req, res) => {
   }
 })
 
+// multer is middleware and must be passed as such to route
 const upload = multer({ 
   // by removing dest option, the files will not save in project folder. this isnt sustainable because it requires a push every time user uploads an image which isnt possible 
   // the file will now be passed to the route handler
@@ -121,6 +123,7 @@ const upload = multer({
   },
   // cb is the callback to tell multer fileFilter is done running
   fileFilter(req, file, cb){
+    // regex: / escapes the '.' paranthesis for group match '|' is for alternate (jpg OR jpeg OR PNG) '$' means at the end of the string
     if (!file.originalname.match(/\.(jpg|jpeg|png)$/)) {
       return cb(new Error('File must be a picture'))
     }
@@ -139,6 +142,7 @@ router.post('/users/me/avatar', auth, upload.single('avatar'), async (req, res) 
   const buffer = await sharp(req.file.buffer).resize({ width: 250, height: 250}).png().toBuffer()
   req.user.avatar = buffer
   await req.user.save()
+// third argument is a callback that only runs when an error is thrown in the route
 // all 4 arguments necessary so express knows this function is meant to handle errors
 }, (error, req, res, next) => {
   res.status(400).send({ error: error.message })
