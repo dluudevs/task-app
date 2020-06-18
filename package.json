@@ -7,7 +7,11 @@
     "_comment": "start is for heroku deployment and dev is for local. scripts have access to locally installed nodemon, cli does not",
     "start": "node src/index.js",
     "dev": "env-cmd ./config/dev.env nodemon src/index.js",
-    "test": "jest"
+    "test": "env-cmd .config/test.env jest --watch"
+  },
+  "jest": {
+    "_comment": "Setup test environment to node using jest object, by default Jest test environment is the dom",
+    "testEnvironment": "node"
   },
   "keywords": [],
   "author": "",
