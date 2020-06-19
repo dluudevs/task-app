@@ -27,6 +27,7 @@ router.post('/users', async (req, res) => {
     await user.save()
     sendWelcomeEmail(user.email, user.name)
     // generate token once a new user is added to collection so user doesn't have to login. (only runs when above promise is fulfilled)
+    // new token gets added to document's array via the method
     const token = await user.generateAuthToken()
     // errors by default sends 200 status code, this is misleading
     res.status(201).send({ user, token })

@@ -33,18 +33,37 @@ beforeEach(async () => {
 // this is why there is a test.env file with another database so it doesnt conflict with the local one
 test('Should sign up a new user', async () => {
   // post to /users endpoint and send object
-  await request(app).post('/users').send({
+  const response = await request(app).post('/users').send({
     name: 'Derek',
     email: 'derek@example.com',
     password: 'red123$'
   }).expect(201) // expect 201 status 
+
+  // Assert that the database was changed correctly
+  const user = await User.findById(response.body.user._id)
+  expect(user).not.toBeNull()
+
+  // Assertions about the response
+  expect(response.body).toMatchObject({
+    user: {
+      name: 'Derek',
+      email: 'derek@example.com'
+    },
+    token: user.tokens[0].token
+  })
+
+  expect(user.password).not.toBe('red123$')
 })
 
 test('Should login existing user', async () => {
-  await request(app).post('/users/login').send({
+  const response = await request(app).post('/users/login').send({
     email: userOne.email,
     password: userOne.password
   }).expect(200)
+
+  const user = await User.findById(response.body.user._id)
+  // expect that the newly generated token is added to the documents token property (this happens via the generateAuthToken method defined in the User model)
+  expect(response.body.token).toBe(user.tokens[1].token)
 })
 
 test('should not login nonexistent user', async () => {
@@ -70,12 +89,16 @@ test('Should not get profile for unauthenticated user', async () => {
     .expect(401)
 })
 
-test('Should delete profile for authenticated user', async () => {
+test('Should delete account for user', async () => {
   await request(app)
     .delete('/users/me')
     .set('Authorization', `Bearer ${userOne.tokens[0].token}`)
     .send()
     .expect(200)
+
+  // assert that user is deleted from database
+  const user = await User.findById(userOneId)  
+  expect(user).toBeNull()
 })
 
 test('Should not delete profile for unauthenticated user', async () => {
