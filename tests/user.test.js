@@ -76,7 +76,7 @@ test('should not login nonexistent user', async () => {
 test('should get profile for user', async () => {
   await request(app)
     .get('/users/me')
-    // sets header
+    // sets header key value pairs
     .set('Authorization', `Bearer ${userOne.tokens[0].token}`)
     .send()
     .expect(200)
@@ -106,4 +106,37 @@ test('Should not delete profile for unauthenticated user', async () => {
     .delete('/users/me')
     .send()
     .expect(401)
+})
+
+test('Should upload avatar image', async () => {
+  await request(app)
+    .post('/users/me/avatar')
+    .set('Authorization', `Bearer ${userOne.tokens[0].token}`)
+    .attach('avatar', 'tests/fixtures/profile-pic.jpg')
+    .expect(200)
+
+  const user = await User.findById(userOneId)
+  console.log(user)
+  // check if avatar is binary data stored in a buffer
+  // expect.any takes in a constructor function for some sort of type (eg., String, Number, Buffer)
+  // expect(user.avatar).toEqual(expect.any(Buffer))
+})
+
+test('Should update valid user fields', async () => {
+  await request(app)
+    .patch('/users/me')
+    .set('Authorization', `Bearer ${userOne.tokens[0].token}`)
+    .send({name: 'Delvv'})
+    .expect(200)
+
+  const user = await User.findById(userOneId)
+  expect(user.name).toBe('Delvv')
+})
+
+test('should not update invalid user fields', async () => {
+  await request(app)
+    .patch('/users/me')
+    .set('Authorization', `Bearer ${userOne.tokens[0].token}`)
+    .send({ location: 'Toronto'})
+    .expect(400)
 })
