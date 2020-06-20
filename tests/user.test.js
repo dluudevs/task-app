@@ -1,33 +1,12 @@
 // supertest is a library created by express that allows us to easily run our test server / tests
 // otherwise we would have to run the server and tests separately
 const request = require('supertest')
-const jwt = require('jsonwebtoken')
-const mongoose = require('mongoose')
+
 const app = require('../src/app')
 const User = require('../src/models/user')
+const { userOneId, userOne, setupDatabase } = require('./fixtures/db')
 
-// use mongoose method to create new instance of objectid
-const userOneId = new mongoose.Types.ObjectId()
-const userOne = {
-  _id: userOneId,
-  name: 'Mike',
-  email: 'mike@example.com',
-  password: '56what!!',
-  tokens: [
-    {
-      token: jwt.sign({_id: userOneId}, process.env.JWT_SECRET)
-    }
-  ]
-}
-
-// runs before each test case
-beforeEach(async () => {
-  // no argument passed to deleteMany delete everything inside of the User collection
-  // with await, jest will only move on to test cases when promise is resolved (users are all deleted)
-  await User.deleteMany()
-  // save a new user 
-  await new User(userOne).save()
-})
+beforeEach(setupDatabase)
 
 // for tests to run smoothly, the database must be cleared otherwise tests below would fail because you wont be able to create a user that already exists
 // this is why there is a test.env file with another database so it doesnt conflict with the local one
@@ -116,6 +95,7 @@ test('Should upload avatar image', async () => {
     .expect(200)
 
   const user = await User.findById(userOneId)
+  // tests fail without this console log?????????????
   console.log(user)
   // check if avatar is binary data stored in a buffer
   // expect.any takes in a constructor function for some sort of type (eg., String, Number, Buffer)
