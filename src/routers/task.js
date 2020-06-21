@@ -5,7 +5,7 @@ const auth = require('../middleware/auth')
 
 // GET /tasks?completed=false
 // GET /tasks?limit=10&skip=0
-// GET /tasks?sortBy=createdAt
+// GET /tasks?sortBy=createdAt:desc
 router.get('/tasks', auth, async (req, res) => {
   try {
     // no if statement required, since endpoint is searching for ALL documents. if it returns an empty array, nothing was found
@@ -21,9 +21,9 @@ router.get('/tasks', auth, async (req, res) => {
     // if query exists, assign sorted field with appropriate value. otherwise provide an empty object
     if (req.query.sortBy) {
       const parts = req.query.sortBy.split(':')
+      console.log(parts)
       sort[parts[0]] = parts[1] === 'desc' ? - 1 : 1
     }
-
 
     // populate all data from a relationship (virtual property in user model), in this case we want to populate our reference to tasks
     // will populate all tasks with owner field (contains _id) that matches user _id field

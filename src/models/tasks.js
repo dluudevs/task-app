@@ -21,6 +21,7 @@ const taskSchema = mongoose.Schema(
       required: true,
       // create reference from this field to another model. the reference must match the name of the model in its mongoose.model method
       // allows us to populate all documents that match the value in this field
+      // User must authenticated to retrieve their tasks as the task model requires the value for user._id
       ref: 'User'
     }
   }, 

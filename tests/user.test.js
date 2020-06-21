@@ -95,8 +95,6 @@ test('Should upload avatar image', async () => {
     .expect(200)
 
   const user = await User.findById(userOneId)
-  // tests fail without this console log?????????????
-  console.log(user)
   // check if avatar is binary data stored in a buffer
   // expect.any takes in a constructor function for some sort of type (eg., String, Number, Buffer)
   // expect(user.avatar).toEqual(expect.any(Buffer))
@@ -106,6 +104,7 @@ test('Should update valid user fields', async () => {
   await request(app)
     .patch('/users/me')
     .set('Authorization', `Bearer ${userOne.tokens[0].token}`)
+    // send is the body (json object in postman)
     .send({name: 'Delvv'})
     .expect(200)
 
