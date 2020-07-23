@@ -95,6 +95,7 @@ test('Should upload avatar image', async () => {
     .expect(200)
 
   const user = await User.findById(userOneId)
+  console.log(user)
   // check if avatar is binary data stored in a buffer
   // expect.any takes in a constructor function for some sort of type (eg., String, Number, Buffer)
   // expect(user.avatar).toEqual(expect.any(Buffer))

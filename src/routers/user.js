@@ -2,6 +2,7 @@ const express = require('express')
 const router = new express.Router()
 const User = require('../models/user')
 const auth = require('../middleware/auth')
+// to uploaded a file to multer, body of request must use form-data
 const multer = require('multer')
 const sharp = require('sharp')
 const { sendWelcomeEmail, sendCancelEmail } = require('../emails/account')
@@ -47,9 +48,11 @@ router.post('/users/login', async (req, res) => {
     res.send({ user, token })
   } catch (e) { 
     res.status(400).send()
+    
   }
 })
 
+// middleware such as auth, stores data in the form of properties inside of the req argument so that it can be accessed later by the route handler
 router.post('/users/logout', auth, async (req, res) => {
   try {
     req.user.tokens = req.user.tokens.filter(token => token.token !== req.token)
@@ -117,7 +120,7 @@ router.delete('/users/me', auth, async(req, res) => {
 // multer is middleware and must be passed as such to route
 const upload = multer({ 
   // by removing dest option, the files will not save in project folder. this isnt sustainable because it requires a push every time user uploads an image which isnt possible 
-  // the file will now be passed to the route handler
+  // the file will now be passed to the route handler to the req argument
   // dest: 'avatars',
   limits: {
     fileSize: 1000000
@@ -136,11 +139,13 @@ const upload = multer({
 
 // the returned value of upload.single is what is being passed as middleware. (the argument passed is the name of the upload)
 // middleware tells multer to look for file named upload when the request comes in. this will be the key in the request's body
+// avatar is the field in the request body (the key being used in the request)
 router.post('/users/me/avatar', auth, upload.single('avatar'), async (req, res) => {
   res.send()
-  // uploaded file. buffer is where the data is temporarily stored waiting to be processed (like RAM)
+  // multer stores the files to req.file, buffer is where the data is temporarily stored in binary before it is processed
   // convert the file and save it to buffer so that it can be accessed later
   const buffer = await sharp(req.file.buffer).resize({ width: 250, height: 250}).png().toBuffer()
+  // save binary format of image to user model
   req.user.avatar = buffer
   await req.user.save()
 // third argument is a callback that only runs when an error is thrown in the route

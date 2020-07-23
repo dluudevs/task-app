@@ -18,7 +18,7 @@ const auth = async (req, res, next) => {
       // throw error to trigger catch if no user found
       throw new Error() 
     }
-    // stores the located user and token so route handler can access these values
+    // stores the located user and token in request variable so route handler callback can access these values  - is this why middleware is used?
     req.token = token
     req.user = user
     // otherwise call route handler function

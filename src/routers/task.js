@@ -1,4 +1,7 @@
 const express = require('express')
+// to uploaded a file to multer, body of request must use form-data
+const multer = require('multer')
+const sharp = require('sharp')
 const router = new express.Router()
 const Task = require('../models/tasks')
 const auth = require('../middleware/auth')
@@ -60,9 +63,41 @@ router.get('/tasks/:id', auth, async (req, res) => {
   }
 })
 
-router.post('/tasks', auth, async (req, res) => {
+router.get('/tasks/:id/picture', auth, async (req, res) => {
+  try {
+    // auth provides req.user; search by task ID and by user ID. so users can only view their own tasks
+    const task = await Task.findOne({ _id: req.params.id, owner: req.user._id})
+
+    if (!task || !task.picture){
+      // error will be caught by catch block
+      throw new Error
+    }
+
+    res.set('Content-Type', 'image/png')
+    res.send(task.picture)
+  } catch (error) {
+    res.status(500).send()
+  }
+})
+
+// multer middleware saves uploads in req.file
+const upload = multer({
+  limits: 1000000,
+  fileFilter(req, file, cb){
+    if(!file.originalname.match(/\.(jpg|jpeg|png)$/)){
+      return cb(new Error("File must be a picture"))
+    }
+
+    // when the file matches conditions
+    cb(undefined, true)
+  }
+})
+
+router.post('/tasks', auth, upload.single('picture'), async (req, res) => {
   const task = new Task({ ...req.body, owner: req.user._id })
   try {
+    const buffer = await sharp(req.file.buffer).resize({width: 250, height: 250}).png().toBuffer()
+    task.picture = buffer
     await task.save()
     res.status(201).send(task)
   } catch (e) {

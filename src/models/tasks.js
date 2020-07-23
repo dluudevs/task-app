@@ -23,7 +23,10 @@ const taskSchema = mongoose.Schema(
       // allows us to populate all documents that match the value in this field
       // User must authenticated to retrieve their tasks as the task model requires the value for user._id
       ref: 'User'
-    }
+    },
+    picture: {
+      type: Buffer
+    },
   }, 
   {
     timestamps: true
